@@ -15,6 +15,7 @@ const productSchema = new mongoose.Schema(
     image: {
       type: String,
       default: "",
+      // Path: /uploads/products/filename.jpg
     },
     basePrice: {
       type: Number,

@@ -1,4 +1,5 @@
 import Product from "../models/Product.js";
+import { deleteFileImage } from "../lib/utils.js";
 
 // @desc    Get all products (paginated)
 // @route   GET /api/products?page=1&limit=10&categoryId=xxx
@@ -48,8 +49,8 @@ export const getProduct = async (req, res) => {
 // @route   POST /api/products
 export const createProduct = async (req, res) => {
   try {
-    const { categoryId, name, image, basePrice, hasVariant, variants } =
-      req.body;
+    const { categoryId, name, basePrice, hasVariant, variants } = req.body;
+    const image = req.file ? `/uploads/products/${req.file.filename}` : "";
 
     const product = await Product.create({
       categoryId,
@@ -57,7 +58,7 @@ export const createProduct = async (req, res) => {
       image,
       basePrice,
       hasVariant,
-      variants: hasVariant ? variants : [],
+      variants: hasVariant ? JSON.parse(variants || "[]") : [],
     });
 
     res.status(201).json(product);
@@ -75,15 +76,18 @@ export const updateProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    const { categoryId, name, image, basePrice, hasVariant, variants } =
-      req.body;
+    const { categoryId, name, basePrice, hasVariant, variants } = req.body;
+
+    if (req.file) {
+      deleteFileImage(product.image);
+      product.image = `/uploads/products/${req.file.filename}`;
+    }
 
     product.categoryId = categoryId || product.categoryId;
     product.name = name || product.name;
-    product.image = image ?? product.image;
     product.basePrice = basePrice ?? product.basePrice;
     product.hasVariant = hasVariant ?? product.hasVariant;
-    product.variants = hasVariant ? variants || [] : [];
+    product.variants = hasVariant ? JSON.parse(variants || "[]") : [];
 
     await product.save();
     res.json(product);
@@ -96,10 +100,12 @@ export const updateProduct = async (req, res) => {
 // @route   DELETE /api/products/:id
 export const deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
+    const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+    deleteFileImage(product.image);
+    await Product.findByIdAndDelete(req.params.id);
     res.json({ message: "Product deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });

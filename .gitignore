@@ -1,4 +1,7 @@
 server/node_modules/
 server/.env
+server/public/uploads/*
+!server/public/uploads/**/.gitkeep
 DESIGN.md
 PRD.md
+PLAN.md
