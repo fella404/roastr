@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'core/network/api_service.dart';
 import 'core/network/storage_service.dart';
+import 'core/theme/app_theme.dart';
 import 'routing/router.dart';
 
 void main() async {
@@ -32,13 +33,7 @@ class RoastrApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'Roastr POS',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF006241),
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light,
       routerConfig: router,
     );
   }
