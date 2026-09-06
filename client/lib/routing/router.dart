@@ -1,25 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
+import '../features/auth/providers/auth_provider.dart';
+import '../features/auth/screens/login_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final router = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: '/login',
+  redirect: (context, state) {
+    final authProvider = context.read<AuthProvider>();
+    final isAuthenticated = authProvider.isAuthenticated;
+    final location = state.uri.toString();
+    final isLoginPage = location == '/login';
+
+    if (!isAuthenticated && !isLoginPage) {
+      return '/login';
+    }
+
+    if (isAuthenticated && isLoginPage) {
+      final role = authProvider.user?.role;
+      if (role == 'ADMIN') return '/admin/dashboard';
+      return '/catalog';
+    }
+
+    if (isAuthenticated) {
+      final role = authProvider.user?.role;
+      if (role == 'CASHIER' && location.startsWith('/admin')) {
+        return '/catalog';
+      }
+      if (role == 'ADMIN' && !location.startsWith('/admin') && !isLoginPage) {
+        return '/admin/dashboard';
+      }
+    }
+
+    return null;
+  },
   routes: [
-    GoRoute(
-      path: '/login',
-      builder: (context, state) => const _PlaceholderPage(title: 'Login'),
-    ),
+    GoRoute(path: '/login', builder: (context, state) => const Loginpage()),
 
     ShellRoute(
       builder: (context, state, child) {
         return _CashierShellLayout(child: child);
       },
       routes: [
-        GoRoute(path: '/catalog', builder: (context, state) => const _PlaceholderPage(title: 'Catalog')),
-        GoRoute(path: '/cart', builder: (context, state) => const _PlaceholderPage(title: 'Cart')),
-        GoRoute(path: '/history', builder: (context, state) => const _PlaceholderPage(title: 'History')),
+        GoRoute(
+          path: '/catalog',
+          builder: (context, state) => const _PlaceholderPage(title: 'Catalog'),
+        ),
+        GoRoute(
+          path: '/cart',
+          builder: (context, state) => const _PlaceholderPage(title: 'Cart'),
+        ),
+        GoRoute(
+          path: '/history',
+          builder: (context, state) => const _PlaceholderPage(title: 'History'),
+        ),
       ],
     ),
 
@@ -28,14 +66,30 @@ final router = GoRouter(
         return _AdminShellLayout(child: child);
       },
       routes: [
-        GoRoute(path: '/admin/dashboard', builder: (context, state) => const _PlaceholderPage(title: 'Dashboard')),
-        GoRoute(path: '/admin/users', builder: (context, state) => const _PlaceholderPage(title: 'Users')),
-        GoRoute(path: '/admin/categories', builder: (context, state) => const _PlaceholderPage(title: 'Categories')),
-        GoRoute(path: '/admin/products', builder: (context, state) => const _PlaceholderPage(title: 'Products')),
+        GoRoute(
+          path: '/admin/dashboard',
+          builder: (context, state) =>
+              const _PlaceholderPage(title: 'Dashboard'),
+        ),
+        GoRoute(
+          path: '/admin/users',
+          builder: (context, state) => const _PlaceholderPage(title: 'Users'),
+        ),
+        GoRoute(
+          path: '/admin/categories',
+          builder: (context, state) =>
+              const _PlaceholderPage(title: 'Categories'),
+        ),
+        GoRoute(
+          path: '/admin/products',
+          builder: (context, state) =>
+              const _PlaceholderPage(title: 'Products'),
+        ),
       ],
     ),
   ],
 );
+
 class _CashierShellLayout extends StatelessWidget {
   final Widget child;
   const _CashierShellLayout({required this.child});
@@ -45,7 +99,7 @@ class _CashierShellLayout extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          child,          
+          child,
           Positioned(
             left: 20,
             right: 20,
@@ -100,10 +154,22 @@ class _AdminShellLayout extends StatelessWidget {
             },
             labelType: NavigationRailLabelType.all,
             destinations: const [
-              NavigationRailDestination(icon: Icon(Icons.dashboard), label: Text('Dashboard')),
-              NavigationRailDestination(icon: Icon(Icons.inventory_2), label: Text('Products')),
-              NavigationRailDestination(icon: Icon(Icons.category), label: Text('Categories')),
-              NavigationRailDestination(icon: Icon(Icons.people), label: Text('Users')),
+              NavigationRailDestination(
+                icon: Icon(Icons.dashboard),
+                label: Text('Dashboard'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.inventory_2),
+                label: Text('Products'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.category),
+                label: Text('Categories'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.people),
+                label: Text('Users'),
+              ),
             ],
           ),
           const VerticalDivider(thickness: 1, width: 1),

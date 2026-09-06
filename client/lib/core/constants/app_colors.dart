@@ -19,6 +19,7 @@ class AppColors {
   static const Color neutralWarm = Color(0xFFF2F0EB);
   static const Color ceramic = Color(0xFFEDEBE9);
   static const Color black = Color(0xFF000000);
+  static const Color border = Color(0xFFD6DBDE);
 
   // Text
   static const Color textBlack = Color(0xFF212121);
