@@ -1,9 +1,12 @@
+import 'package:client/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../features/auth/providers/auth_provider.dart';
 import '../features/auth/screens/login_page.dart';
+import '../shared/widgets/admin_drawer.dart';
+import '../shared/widgets/floating_close_button.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -85,6 +88,15 @@ final router = GoRouter(
           builder: (context, state) =>
               const _PlaceholderPage(title: 'Products'),
         ),
+        GoRoute(
+          path: '/admin/transactions',
+          builder: (context, state) =>
+              const _PlaceholderPage(title: 'Transaction History'),
+        ),
+        GoRoute(
+          path: '/admin/profile',
+          builder: (context, state) => const _PlaceholderPage(title: 'Profile'),
+        ),
       ],
     ),
   ],
@@ -135,57 +147,53 @@ class _CashierShellLayout extends StatelessWidget {
   }
 }
 
-class _AdminShellLayout extends StatelessWidget {
+class _AdminShellLayout extends StatefulWidget {
   final Widget child;
   const _AdminShellLayout({required this.child});
 
   @override
+  State<_AdminShellLayout> createState() => _AdminShellLayoutState();
+}
+
+class _AdminShellLayoutState extends State<_AdminShellLayout> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  OverlayEntry? _floatingCloseButtonEntry;
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Row(
-        children: [
-          NavigationRail(
-            selectedIndex: _calculateAdminIndex(context),
-            onDestinationSelected: (index) {
-              if (index == 0) context.go('/admin/dashboard');
-              if (index == 1) context.go('/admin/products');
-              if (index == 2) context.go('/admin/categories');
-              if (index == 3) context.go('/admin/users');
-            },
-            labelType: NavigationRailLabelType.all,
-            destinations: const [
-              NavigationRailDestination(
-                icon: Icon(Icons.dashboard),
-                label: Text('Dashboard'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.inventory_2),
-                label: Text('Products'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.category),
-                label: Text('Categories'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.people),
-                label: Text('Users'),
-              ),
-            ],
-          ),
-          const VerticalDivider(thickness: 1, width: 1),
-          Expanded(child: child),
-        ],
-      ),
+      key: _scaffoldKey,
+      drawer: const AdminDrawer(),
+      drawerEnableOpenDragGesture: false,
+      onDrawerChanged: (isOpen) {
+        if (isOpen) {
+          _showFloatingCloseButton();
+        } else {
+          _hideFloatingCloseButton();
+        }
+      },
+      body: widget.child,
     );
   }
 
-  int _calculateAdminIndex(BuildContext context) {
-    final location = GoRouterState.of(context).uri.toString();
-    if (location.startsWith('/admin/dashboard')) return 0;
-    if (location.startsWith('/admin/products')) return 1;
-    if (location.startsWith('/admin/categories')) return 2;
-    if (location.startsWith('/admin/users')) return 3;
-    return 0;
+  void _showFloatingCloseButton() {
+    _floatingCloseButtonEntry?.remove();
+    _floatingCloseButtonEntry = OverlayEntry(
+      builder: (context) =>
+          FloatingCloseButton(onTap: () => Navigator.of(context).pop()),
+    );
+    Overlay.of(context).insert(_floatingCloseButtonEntry!);
+  }
+
+  void _hideFloatingCloseButton() {
+    _floatingCloseButtonEntry?.remove();
+    _floatingCloseButtonEntry = null;
+  }
+
+  @override
+  void dispose() {
+    _floatingCloseButtonEntry?.remove();
+    super.dispose();
   }
 }
 
@@ -195,8 +203,27 @@ class _PlaceholderPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentLocation = GoRouterState.of(context).uri.toString();
+    final isAdminPage = currentLocation.startsWith('/admin');
+
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      appBar: AppBar(
+        leading: isAdminPage
+            ? IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => Scaffold.of(context).openDrawer(),
+              )
+            : null,
+        titleSpacing: 12,
+        title: Text(
+          title,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textBlack,
+          ),
+        ),
+      ),
       body: Center(child: Text(title, style: const TextStyle(fontSize: 24))),
     );
   }
