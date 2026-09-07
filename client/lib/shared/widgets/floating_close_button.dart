@@ -9,9 +9,10 @@ class FloatingCloseButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final topPadding = MediaQuery.of(context).padding.top;
     return Positioned(
       left: 296, // 280px (drawer width) + 16px
-      top: 16, // Aligned with AppBar height
+      top: topPadding + 16, // Safe area + spacing
       child: GestureDetector(
         onTap: onTap,
         child: Container(
