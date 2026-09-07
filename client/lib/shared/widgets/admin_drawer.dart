@@ -21,8 +21,7 @@ class AdminDrawer extends StatelessWidget {
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
       child: Column(
         children: [
-          _buildHeader(user),
-          const Divider(height: 1, thickness: 1, color: AppColors.ceramic),
+          _buildHeader(context, user),
           Expanded(child: _buildNavigationItems(context, currentLocation)),
           const Divider(height: 1, thickness: 1, color: AppColors.ceramic),
           _buildLogoutButton(context),
@@ -31,10 +30,12 @@ class AdminDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(User? user) {
+  Widget _buildHeader(BuildContext context, User? user) {
+    final topPadding = MediaQuery.of(context).padding.top;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.fromLTRB(16, topPadding + 16, 16, 16),
+      decoration: BoxDecoration(color: AppColors.greenAccent),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -43,23 +44,26 @@ class AdminDrawer extends StatelessWidget {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w600,
-              color: AppColors.houseGreen,
+              color: AppColors.white,
             ),
           ),
           const SizedBox(height: 8),
           if (user != null)
             Text(
-              '${user.name} (${user.role})',
-              style: const TextStyle(
+              '${user.name} (${user.role[0].toUpperCase() + user.role.substring(1).toLowerCase()})',
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textBlack,
+                color: AppColors.white.withValues(alpha: 0.9),
               ),
             )
           else
-            const Text(
+            Text(
               'Guest',
-              style: TextStyle(fontSize: 16, color: AppColors.textBlackSoft),
+              style: TextStyle(
+                fontSize: 16,
+                color: AppColors.white.withValues(alpha: 0.7),
+              ),
             ),
         ],
       ),
