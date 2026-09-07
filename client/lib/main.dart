@@ -16,7 +16,7 @@ void main() async {
 
   final apiService = ApiService(storageService);
   final authService = AuthService(apiService, storageService);
-  final authProvider = AuthProvider(authService);
+  final authProvider = AuthProvider(authService, apiService);
 
   await authProvider.checkAuthStatus();
 

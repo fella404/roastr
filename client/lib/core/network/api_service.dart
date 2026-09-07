@@ -7,6 +7,7 @@ import 'storage_service.dart';
 
 class ApiService {
   final StorageService _storage;
+  void Function(ApiException error)? onError;
 
   ApiService(this._storage);
 
@@ -46,10 +47,12 @@ class ApiService {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return body is Map<String, dynamic> ? body : {'data': body};
     }
-    throw ApiException(
+    final error = ApiException(
       statusCode: response.statusCode,
       message: body['message'] ?? 'Terjadi kesalahan',
     );
+    onError?.call(error);
+    throw error;
   }
 }
 
