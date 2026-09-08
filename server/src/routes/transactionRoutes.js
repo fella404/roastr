@@ -3,6 +3,7 @@ import {
   createTransaction,
   getTransactions,
   getTransaction,
+  searchTransactions,
 } from "../controllers/transactionController.js";
 import { protect } from "../middleware/auth.js";
 
@@ -11,6 +12,7 @@ const router = express.Router();
 router.use(protect);
 
 router.route("/").get(getTransactions).post(createTransaction);
+router.get("/search", searchTransactions);
 router.route("/:id").get(getTransaction);
 
 export default router;

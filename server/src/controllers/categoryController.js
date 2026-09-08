@@ -95,3 +95,28 @@ export const deleteCategory = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// @desc    Search categories by name
+// @route   GET /api/categories/search?search=coffee&page=1&limit=10
+export const searchCategories = async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 10));
+    const skip = (page - 1) * limit;
+    const search = req.query.search || "";
+
+    const filter = search ? { name: { $regex: search, $options: "i" } } : {};
+
+    const [categories, total] = await Promise.all([
+      Category.find(filter).skip(skip).limit(limit),
+      Category.countDocuments(filter),
+    ]);
+
+    res.json({
+      data: categories,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

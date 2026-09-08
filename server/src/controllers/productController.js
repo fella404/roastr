@@ -111,3 +111,31 @@ export const deleteProduct = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// @desc    Search products by name
+// @route   GET /api/products/search?search=latte&page=1&limit=10
+export const searchProducts = async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 10));
+    const skip = (page - 1) * limit;
+    const search = req.query.search || "";
+
+    const filter = search ? { name: { $regex: search, $options: "i" } } : {};
+
+    const [products, total] = await Promise.all([
+      Product.find(filter)
+        .populate("categoryId", "name icon")
+        .skip(skip)
+        .limit(limit),
+      Product.countDocuments(filter),
+    ]);
+
+    res.json({
+      data: products,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

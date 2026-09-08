@@ -135,3 +135,34 @@ export const getTransaction = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// @desc    Search transactions by customer name
+// @route   GET /api/transactions/search?search=john&page=1&limit=10
+export const searchTransactions = async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 10));
+    const skip = (page - 1) * limit;
+    const search = req.query.search || "";
+
+    const filter = search
+      ? { customerName: { $regex: search, $options: "i" } }
+      : {};
+
+    const [transactions, total] = await Promise.all([
+      Transaction.find(filter)
+        .populate("cashierId", "name")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Transaction.countDocuments(filter),
+    ]);
+
+    res.json({
+      data: transactions,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

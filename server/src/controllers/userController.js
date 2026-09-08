@@ -122,3 +122,38 @@ export const toggleActive = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// @desc    Search users by name or email
+// @route   GET /api/users/search?search=john&page=1&limit=10
+export const searchUsers = async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 10));
+    const skip = (page - 1) * limit;
+    const search = req.query.search || "";
+
+    const filter = search
+      ? {
+          $or: [
+            { name: { $regex: search, $options: "i" } },
+            { email: { $regex: search, $options: "i" } },
+          ],
+        }
+      : {};
+
+    const [users, total] = await Promise.all([
+      User.find(filter)
+        .select("-verificationCode -verificationCodeExpires")
+        .skip(skip)
+        .limit(limit),
+      User.countDocuments(filter),
+    ]);
+
+    res.json({
+      data: users,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
