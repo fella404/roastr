@@ -124,9 +124,12 @@ class AdminDrawer extends StatelessWidget {
           tileColor: isActive
               ? AppColors.greenAccent.withValues(alpha: 0.7)
               : null,
-          onTap: () {
+          onTap: () async {
             Navigator.of(context).pop(); // Close drawer
-            context.go(item.route);
+            await Future.delayed(const Duration(milliseconds: 300));
+            if (context.mounted) {
+              context.go(item.route);
+            }
           },
         );
       },
@@ -141,7 +144,9 @@ class AdminDrawer extends StatelessWidget {
         child: ElevatedButton.icon(
           onPressed: () async {
             Navigator.of(context).pop(); // Close drawer
-            await context.read<AuthProvider>().logout();
+            final authProvider = context.read<AuthProvider>();
+            await Future.delayed(const Duration(milliseconds: 300));
+            await authProvider.logout();
             if (context.mounted) {
               context.go('/login');
             }
