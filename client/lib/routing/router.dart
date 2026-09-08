@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../features/auth/providers/auth_provider.dart';
+import '../features/admin/screens/manage_category_page.dart';
 import '../features/auth/screens/login_page.dart';
 import '../shared/widgets/admin_drawer.dart';
 import '../shared/widgets/floating_close_button.dart';
@@ -78,11 +79,10 @@ final router = GoRouter(
           path: '/admin/users',
           builder: (context, state) => const _PlaceholderPage(title: 'Users'),
         ),
-        GoRoute(
-          path: '/admin/categories',
-          builder: (context, state) =>
-              const _PlaceholderPage(title: 'Categories'),
-        ),
+GoRoute(
+  path: '/admin/categories',
+  builder: (context, state) => const ManageCategoryPage(),
+),
         GoRoute(
           path: '/admin/products',
           builder: (context, state) =>

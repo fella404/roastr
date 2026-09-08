@@ -102,7 +102,7 @@ class AdminDrawer extends StatelessWidget {
       separatorBuilder: (context, index) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         final item = navItems[index];
-        final isActive = currentLocation.startsWith(item.route);
+        final isActive = currentLocation == item.route;
 
         return ListTile(
           leading: Icon(
@@ -124,12 +124,8 @@ class AdminDrawer extends StatelessWidget {
           tileColor: isActive
               ? AppColors.greenAccent.withValues(alpha: 0.7)
               : null,
-          onTap: () async {
-            Navigator.of(context).pop(); // Close drawer
-            await Future.delayed(const Duration(milliseconds: 300));
-            if (context.mounted) {
-              context.go(item.route);
-            }
+          onTap: () {
+            context.go(item.route);
           },
         );
       },
@@ -143,9 +139,7 @@ class AdminDrawer extends StatelessWidget {
         width: double.infinity,
         child: ElevatedButton.icon(
           onPressed: () async {
-            Navigator.of(context).pop(); // Close drawer
             final authProvider = context.read<AuthProvider>();
-            await Future.delayed(const Duration(milliseconds: 300));
             await authProvider.logout();
             if (context.mounted) {
               context.go('/login');
