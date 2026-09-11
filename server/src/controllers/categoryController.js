@@ -1,5 +1,25 @@
 import Category from "../models/Category.js";
 
+const categoryAggregate = (filter = {}) => [
+  {
+    $lookup: {
+      from: "products",
+      localField: "_id",
+      foreignField: "categoryId",
+      as: "products",
+    },
+  },
+  {
+    $addFields: {
+      totalProducts: { $size: "$products" },
+    },
+  },
+  { $project: { products: 0 } },
+  ...(filter.name
+    ? [{ $match: { name: { $regex: filter.name, $options: "i" } } }]
+    : []),
+];
+
 // @desc    Get all categories (paginated)
 // @route   GET /api/categories?page=1&limit=10
 export const getCategories = async (req, res) => {
@@ -8,10 +28,17 @@ export const getCategories = async (req, res) => {
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 10));
     const skip = (page - 1) * limit;
 
-    const [categories, total] = await Promise.all([
-      Category.find().skip(skip).limit(limit),
-      Category.countDocuments(),
+    const pipeline = categoryAggregate();
+
+    const countPipeline = [...pipeline, { $count: "total" }];
+    const dataPipeline = [...pipeline, { $skip: skip }, { $limit: limit }];
+
+    const [countResult, categories] = await Promise.all([
+      Category.aggregate(countPipeline),
+      Category.aggregate(dataPipeline),
     ]);
+
+    const total = countResult[0]?.total || 0;
 
     res.json({
       data: categories,
@@ -105,12 +132,17 @@ export const searchCategories = async (req, res) => {
     const skip = (page - 1) * limit;
     const search = req.query.search || "";
 
-    const filter = search ? { name: { $regex: search, $options: "i" } } : {};
+    const pipeline = categoryAggregate(search ? { name: search } : {});
 
-    const [categories, total] = await Promise.all([
-      Category.find(filter).skip(skip).limit(limit),
-      Category.countDocuments(filter),
+    const countPipeline = [...pipeline, { $count: "total" }];
+    const dataPipeline = [...pipeline, { $skip: skip }, { $limit: limit }];
+
+    const [countResult, categories] = await Promise.all([
+      Category.aggregate(countPipeline),
+      Category.aggregate(dataPipeline),
     ]);
+
+    const total = countResult[0]?.total || 0;
 
     res.json({
       data: categories,

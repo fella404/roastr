@@ -29,6 +29,7 @@ class AppTheme {
         backgroundColor: AppColors.neutralWarm,
         foregroundColor: AppColors.textBlack,
         elevation: 0,
+        scrolledUnderElevation: 0,
         centerTitle: false,
         titleTextStyle: GoogleFonts.poppins(
           fontSize: 20,

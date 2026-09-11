@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'core/network/api_service.dart';
 import 'core/network/storage_service.dart';
 import 'core/theme/app_theme.dart';
+import 'features/admin/providers/category_provider.dart';
+import 'features/admin/services/category_service.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/auth/services/auth_service.dart';
 import 'routing/router.dart';
@@ -18,6 +20,8 @@ void main() async {
   final authService = AuthService(apiService, storageService);
   final authProvider = AuthProvider(authService, apiService);
 
+  final categoryService = CategoryService(apiService);
+
   await authProvider.checkAuthStatus();
 
   runApp(
@@ -26,7 +30,11 @@ void main() async {
         Provider<StorageService>.value(value: storageService),
         Provider<ApiService>.value(value: apiService),
         Provider<AuthService>.value(value: authService),
+        Provider<CategoryService>.value(value: categoryService),
         ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
+        ChangeNotifierProvider<CategoryProvider>(
+          create: (_) => CategoryProvider(categoryService),
+        ),
       ],
       child: const RoastrApp(),
     ),
