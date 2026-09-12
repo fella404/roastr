@@ -73,16 +73,9 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
 
     try {
       if (isEditMode) {
-        await context.read<CategoryProvider>().updateCategory(
-          widget.categoryId!,
-          _nameController.text.trim(),
-          _selectedIcon!,
-        );
+        await context.read<CategoryProvider>().updateCategory(widget.categoryId!, _nameController.text.trim(), _selectedIcon!);
       } else {
-        await context.read<CategoryProvider>().createCategory(
-          _nameController.text.trim(),
-          _selectedIcon!,
-        );
+        await context.read<CategoryProvider>().createCategory(_nameController.text.trim(), _selectedIcon!);
       }
 
       if (mounted) {
@@ -135,10 +128,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
             children: [
               const Icon(Icons.error_outline, size: 48, color: Colors.red),
               const SizedBox(height: 16),
-              const Text(
-                'Failed to load category',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
+              const Text('Failed to load category', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               Text(
                 _loadError!,
@@ -148,10 +138,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _loadCategoryData,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.greenAccent,
-                  foregroundColor: Colors.white,
-                ),
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.greenAccent, foregroundColor: Colors.white),
                 child: const Text('Retry'),
               ),
             ],
@@ -216,11 +203,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 5,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-      ),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5, crossAxisSpacing: 16, mainAxisSpacing: 16),
       itemCount: icons.length,
       itemBuilder: (context, index) {
         final iconKey = icons[index];
@@ -238,19 +221,11 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
             height: 48,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isSelected
-                  ? AppColors.greenAccent.withValues(alpha: 0.1)
-                  : AppColors.ceramic,
-              border: Border.all(
-                color: isSelected ? AppColors.greenAccent : Colors.transparent,
-                width: 2,
-              ),
+              color: isSelected ? AppColors.greenAccent.withValues(alpha: 0.1) : AppColors.white,
+              border: Border.all(color: isSelected ? AppColors.greenAccent : Colors.transparent, width: 2),
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.12), spreadRadius: 0, blurRadius: 12, offset: Offset(2, 4))],
             ),
-            child: Icon(
-              CategoryIcons.getIcon(iconKey),
-              size: 24,
-              color: isSelected ? AppColors.greenAccent : AppColors.textBlackSoft,
-            ),
+            child: Icon(CategoryIcons.getIcon(iconKey), size: 24, color: isSelected ? AppColors.greenAccent : AppColors.textBlackSoft),
           ),
         );
       },
