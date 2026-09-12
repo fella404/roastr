@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../features/auth/providers/auth_provider.dart';
+import '../features/admin/screens/category_form_page.dart';
 import '../features/admin/screens/manage_category_page.dart';
 import '../features/auth/screens/login_page.dart';
 import '../shared/widgets/admin_drawer.dart';
@@ -79,10 +80,10 @@ final router = GoRouter(
           path: '/admin/users',
           builder: (context, state) => const _PlaceholderPage(title: 'Users'),
         ),
-GoRoute(
-  path: '/admin/categories',
-  builder: (context, state) => const ManageCategoryPage(),
-),
+        GoRoute(
+          path: '/admin/categories',
+          builder: (context, state) => const ManageCategoryPage(),
+        ),
         GoRoute(
           path: '/admin/products',
           builder: (context, state) =>
@@ -98,6 +99,18 @@ GoRoute(
           builder: (context, state) => const _PlaceholderPage(title: 'Profile'),
         ),
       ],
+    ),
+
+    GoRoute(
+      path: '/admin/categories/add',
+      builder: (context, state) => const CategoryFormPage(),
+    ),
+    GoRoute(
+      path: '/admin/categories/edit/:id',
+      builder: (context, state) {
+        final categoryId = state.pathParameters['id']!;
+        return CategoryFormPage(categoryId: categoryId);
+      },
     ),
   ],
 );

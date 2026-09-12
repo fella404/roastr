@@ -22,6 +22,13 @@ class CategoryProvider extends ChangeNotifier {
   String get searchQuery => _searchQuery;
   int get currentPage => _currentPage;
 
+  bool _isCreating = false;
+  bool _isUpdating = false;
+  bool _isDeleting = false;
+
+  bool get isCreating => _isCreating;
+  bool get isUpdating => _isUpdating;
+  bool get isDeleting => _isDeleting;
   bool get hasNextPage => _pagination?.hasNextPage ?? false;
   bool get hasPreviousPage => _pagination?.hasPreviousPage ?? false;
   int get totalPages => _pagination?.totalPages ?? 0;
@@ -68,5 +75,56 @@ class CategoryProvider extends ChangeNotifier {
 
   Future<void> refreshCategories() async {
     await fetchCategories(page: 1);
+  }
+
+  Future<void> createCategory(String name, String icon) async {
+    _isCreating = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _service.createCategory(name: name, icon: icon);
+      await fetchCategories(page: 1);
+    } catch (e) {
+      _errorMessage = e.toString();
+      rethrow;
+    } finally {
+      _isCreating = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateCategory(String id, String name, String icon) async {
+    _isUpdating = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _service.updateCategory(id: id, name: name, icon: icon);
+      await fetchCategories(page: _currentPage);
+    } catch (e) {
+      _errorMessage = e.toString();
+      rethrow;
+    } finally {
+      _isUpdating = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteCategory(String id) async {
+    _isDeleting = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _service.deleteCategory(id);
+      await fetchCategories(page: _currentPage);
+    } catch (e) {
+      _errorMessage = e.toString();
+      rethrow;
+    } finally {
+      _isDeleting = false;
+      notifyListeners();
+    }
   }
 }

@@ -1,11 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../shared/widgets/delete_confirmation_dialog.dart';
+import '../../../shared/widgets/loading_overlay.dart';
 import '../../../shared/widgets/manage_item_card.dart';
 import '../../../shared/widgets/search_bar_with_add_button.dart';
+import '../models/category_model.dart';
 import '../providers/category_provider.dart';
 
 class ManageCategoryPage extends StatefulWidget {
@@ -41,6 +45,47 @@ class _ManageCategoryPageState extends State<ManageCategoryPage> {
     });
   }
 
+  void _handleEdit(Category category) {
+    context.push('/admin/categories/edit/${category.id}');
+  }
+
+  void _handleDelete(Category category) {
+    showDialog(
+      context: context,
+      builder: (context) => DeleteConfirmationDialog(
+        title: 'Delete Category',
+        message: 'Are you sure you want to delete this category? This action cannot be undone.',
+        warningMessage: category.totalProducts > 0
+            ? 'All products related to this category will be deleted also'
+            : null,
+        onConfirm: () => _confirmDelete(category.id),
+      ),
+    );
+  }
+
+  Future<void> _confirmDelete(String categoryId) async {
+    if (!mounted) return;
+    LoadingOverlay.show(context, message: 'Deleting category...');
+
+    try {
+      await context.read<CategoryProvider>().deleteCategory(categoryId);
+
+      if (mounted) {
+        LoadingOverlay.hide(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Category deleted successfully'), backgroundColor: Colors.green),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        LoadingOverlay.hide(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,7 +106,7 @@ class _ManageCategoryPageState extends State<ManageCategoryPage> {
               controller: _searchController,
               onChanged: _onSearchChanged,
               onAddPressed: () {
-                // TODO: Implement add category
+                context.push('/admin/categories/add');
               },
             ),
           ),
@@ -113,14 +158,9 @@ class _ManageCategoryPageState extends State<ManageCategoryPage> {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: _buildCategoryItem(
-                            name: category.name,
-                            totalProducts: category.totalProducts,
-                            onEdit: () {
-                              // TODO: Implement edit category
-                            },
-                            onDelete: () {
-                              // TODO: Implement delete category
-                            },
+                            category: category,
+                            onEdit: () => _handleEdit(category),
+                            onDelete: () => _handleDelete(category),
                           ),
                         );
                       }),
@@ -138,8 +178,7 @@ class _ManageCategoryPageState extends State<ManageCategoryPage> {
   }
 
   Widget _buildCategoryItem({
-    required String name,
-    required int totalProducts,
+    required Category category,
     required VoidCallback onEdit,
     required VoidCallback onDelete,
   }) {
@@ -149,11 +188,11 @@ class _ManageCategoryPageState extends State<ManageCategoryPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            name,
+            category.name,
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textBlack),
           ),
           Text(
-            'Total: $totalProducts Product${totalProducts == 1 ? '' : 's'}',
+            'Total: ${category.totalProducts} Product${category.totalProducts == 1 ? '' : 's'}',
             style: const TextStyle(fontSize: 14, color: AppColors.textBlackSoft),
           ),
         ],

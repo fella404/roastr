@@ -30,4 +30,29 @@ class CategoryService {
     final response = await _api.get('${ApiConstants.categories}/$id');
     return Category.fromJson(response);
   }
+
+  Future<void> createCategory({
+    required String name,
+    required String icon,
+  }) async {
+    await _api.post(
+      ApiConstants.categories,
+      body: {'name': name, 'icon': icon},
+    );
+  }
+
+  Future<void> updateCategory({
+    required String id,
+    required String name,
+    required String icon,
+  }) async {
+    await _api.put(
+      '${ApiConstants.categories}/$id',
+      body: {'name': name, 'icon': icon},
+    );
+  }
+
+  Future<void> deleteCategory(String id) async {
+    await _api.delete('${ApiConstants.categories}/$id');
+  }
 }
