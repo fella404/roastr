@@ -23,7 +23,7 @@ Roastr POS App is a Point of Sale application designed specifically for the Roas
 
 - **Employee Management:** Complete CRUD operations for Cashier and Admin accounts.
 - **Category Management:** Organize products with custom categories and icons.
-- **Product Management:** Full control over the product catalog, including prices, variants, images, and category assignments.
+- **Product Management:** Full control over the product catalog, including prices, images, and category assignments.
 - **Analytics Dashboard:**
   - **Key Metrics:** Real-time insights into Today's Revenue, Today's Transactions, and Average Order Value (AOV).
   - **Sales Trend Chart:** Line chart displaying revenue trends with dynamic time filters (Today, This Week, This Month).

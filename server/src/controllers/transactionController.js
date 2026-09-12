@@ -29,20 +29,7 @@ export const createTransaction = async (req, res) => {
           .json({ message: `Product not found: ${item.productId}` });
       }
 
-      let unitPrice;
-      if (item.variantName && product.hasVariant) {
-        const variant = product.variants.find(
-          (v) => v.name === item.variantName
-        );
-        if (!variant) {
-          return res
-            .status(400)
-            .json({ message: `Variant not found: ${item.variantName}` });
-        }
-        unitPrice = variant.price;
-      } else {
-        unitPrice = product.basePrice;
-      }
+      const unitPrice = product.price;
 
       const subTotal = unitPrice * item.quantity;
       totalPrice += subTotal;
@@ -50,7 +37,6 @@ export const createTransaction = async (req, res) => {
       items.push({
         productId: product._id,
         productName: product.name,
-        variantName: item.variantName || null,
         quantity: item.quantity,
         unitPrice,
         subTotal,

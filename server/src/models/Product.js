@@ -17,21 +17,11 @@ const productSchema = new mongoose.Schema(
       default: "",
       // Path: /uploads/products/filename.jpg
     },
-    basePrice: {
+    price: {
       type: Number,
-      required: [true, "Base price is required"],
+      required: [true, "Price is required"],
       min: 0,
     },
-    hasVariant: {
-      type: Boolean,
-      default: false,
-    },
-    variants: [
-      {
-        name: { type: String, required: true, trim: true },
-        price: { type: Number, required: true, min: 0 },
-      },
-    ],
   },
   { timestamps: true }
 );

@@ -49,16 +49,14 @@ export const getProduct = async (req, res) => {
 // @route   POST /api/products
 export const createProduct = async (req, res) => {
   try {
-    const { categoryId, name, basePrice, hasVariant, variants } = req.body;
+    const { categoryId, name, price } = req.body;
     const image = req.file ? `/uploads/products/${req.file.filename}` : "";
 
     const product = await Product.create({
       categoryId,
       name,
       image,
-      basePrice,
-      hasVariant,
-      variants: hasVariant ? JSON.parse(variants || "[]") : [],
+      price,
     });
 
     res.status(201).json(product);
@@ -76,7 +74,7 @@ export const updateProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    const { categoryId, name, basePrice, hasVariant, variants } = req.body;
+    const { categoryId, name, price } = req.body;
 
     if (req.file) {
       deleteFileImage(product.image);
@@ -85,9 +83,7 @@ export const updateProduct = async (req, res) => {
 
     product.categoryId = categoryId || product.categoryId;
     product.name = name || product.name;
-    product.basePrice = basePrice ?? product.basePrice;
-    product.hasVariant = hasVariant ?? product.hasVariant;
-    product.variants = hasVariant ? JSON.parse(variants || "[]") : [];
+    product.price = price ?? product.price;
 
     await product.save();
     res.json(product);
