@@ -42,6 +42,54 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  Future<Map<String, dynamic>> postMultipart(
+    String path, {
+    required Map<String, String> fields,
+    String? filePath,
+    String? fileField,
+  }) async {
+    final uri = Uri.parse('${ApiConstants.baseUrl}$path');
+    final request = http.MultipartRequest('POST', uri);
+
+    if (_token != null) {
+      request.headers['Authorization'] = 'Bearer $_token';
+    }
+
+    request.fields.addAll(fields);
+
+    if (filePath != null && fileField != null) {
+      request.files.add(await http.MultipartFile.fromPath(fileField, filePath));
+    }
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+    return _handleResponse(response);
+  }
+
+  Future<Map<String, dynamic>> putMultipart(
+    String path, {
+    required Map<String, String> fields,
+    String? filePath,
+    String? fileField,
+  }) async {
+    final uri = Uri.parse('${ApiConstants.baseUrl}$path');
+    final request = http.MultipartRequest('PUT', uri);
+
+    if (_token != null) {
+      request.headers['Authorization'] = 'Bearer $_token';
+    }
+
+    request.fields.addAll(fields);
+
+    if (filePath != null && fileField != null) {
+      request.files.add(await http.MultipartFile.fromPath(fileField, filePath));
+    }
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+    return _handleResponse(response);
+  }
+
   Map<String, dynamic> _handleResponse(http.Response response) {
     final body = jsonDecode(response.body);
     if (response.statusCode >= 200 && response.statusCode < 300) {

@@ -7,6 +7,7 @@ import '../features/auth/providers/auth_provider.dart';
 import '../features/admin/screens/category_form_page.dart';
 import '../features/admin/screens/manage_category_page.dart';
 import '../features/admin/screens/manage_product_page.dart';
+import '../features/admin/screens/product_form_page.dart';
 import '../features/auth/screens/login_page.dart';
 import '../shared/widgets/admin_drawer.dart';
 import '../shared/widgets/floating_close_button.dart';
@@ -110,6 +111,17 @@ final router = GoRouter(
       builder: (context, state) {
         final categoryId = state.pathParameters['id']!;
         return CategoryFormPage(categoryId: categoryId);
+      },
+    ),
+    GoRoute(
+      path: '/admin/products/add',
+      builder: (context, state) => const ProductFormPage(),
+    ),
+    GoRoute(
+      path: '/admin/products/edit/:id',
+      builder: (context, state) {
+        final productId = state.pathParameters['id']!;
+        return ProductFormPage(productId: productId);
       },
     ),
   ],

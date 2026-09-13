@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/api_constants.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/category_icons.dart';
 import '../../../shared/widgets/category_filter_chips.dart';
+import '../../../shared/widgets/delete_confirmation_dialog.dart';
 import '../../../shared/widgets/manage_item_card.dart';
 import '../../../shared/widgets/pagination_widget.dart';
 import '../../../shared/widgets/search_bar_with_add_button.dart';
@@ -36,14 +38,45 @@ class _ManageProductPageState extends State<ManageProductPage> {
     super.dispose();
   }
 
-  void _handleEdit(dynamic product) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('Edit ${product.name} - Not implemented yet'), backgroundColor: AppColors.greenAccent));
+  void _handleEdit(dynamic product) async {
+    await context.push('/admin/products/edit/${product.id}');
+    if (mounted) {
+      context.read<ProductProvider>().refreshProducts();
+    }
   }
 
-  void _handleDelete(dynamic product) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('Delete ${product.name} - Not implemented yet'), backgroundColor: Colors.red));
+  Future<void> _handleDelete(dynamic product) async {
+    final productProvider = context.read<ProductProvider>();
+
+    await showDialog(
+      context: context,
+      builder: (context) => DeleteConfirmationDialog(
+        title: 'Delete Product',
+        message: 'Are you sure you want to delete this product?',
+        onConfirm: () async {
+          try {
+            await productProvider.deleteProduct(product.id);
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Product deleted successfully'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            }
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Failed to delete: ${e.toString()}'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
+        },
+      ),
+    );
   }
 
   String _formatPrice(double price) {
@@ -74,10 +107,11 @@ class _ManageProductPageState extends State<ManageProductPage> {
               hintText: 'Search product...',
               controller: _searchController,
               onChanged: (value) => productProvider.searchProducts(value),
-              onAddPressed: () {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('Add Product - Not implemented yet'), backgroundColor: AppColors.greenAccent));
+              onAddPressed: () async {
+                await context.push('/admin/products/add');
+                if (mounted) {
+                  context.read<ProductProvider>().refreshProducts();
+                }
               },
             ),
           ),

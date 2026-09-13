@@ -11,6 +11,9 @@ class ProductProvider extends ChangeNotifier {
   List<Product> _products = [];
   PaginationMeta? _pagination;
   bool _isLoading = false;
+  bool _isCreating = false;
+  bool _isUpdating = false;
+  bool _isDeleting = false;
   String? _errorMessage;
   String _searchQuery = '';
   String? _selectedCategoryId;
@@ -22,6 +25,9 @@ class ProductProvider extends ChangeNotifier {
   List<Product> get products => _products;
   PaginationMeta? get pagination => _pagination;
   bool get isLoading => _isLoading;
+  bool get isCreating => _isCreating;
+  bool get isUpdating => _isUpdating;
+  bool get isDeleting => _isDeleting;
   String? get errorMessage => _errorMessage;
   String get searchQuery => _searchQuery;
   String? get selectedCategoryId => _selectedCategoryId;
@@ -81,6 +87,79 @@ class ProductProvider extends ChangeNotifier {
 
   Future<void> refreshProducts() async {
     await fetchProducts(page: 1);
+  }
+
+  Future<void> createProduct({
+    required String name,
+    required String categoryId,
+    required double price,
+    String? imagePath,
+  }) async {
+    _isCreating = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _service.createProduct(
+        name: name,
+        categoryId: categoryId,
+        price: price,
+        imagePath: imagePath,
+      );
+      await fetchProducts(page: 1);
+    } catch (e) {
+      _errorMessage = e.toString();
+      rethrow;
+    } finally {
+      _isCreating = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateProduct({
+    required String id,
+    required String name,
+    required String categoryId,
+    required double price,
+    String? imagePath,
+  }) async {
+    _isUpdating = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _service.updateProduct(
+        id: id,
+        name: name,
+        categoryId: categoryId,
+        price: price,
+        imagePath: imagePath,
+      );
+      await fetchProducts(page: _currentPage);
+    } catch (e) {
+      _errorMessage = e.toString();
+      rethrow;
+    } finally {
+      _isUpdating = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteProduct(String id) async {
+    _isDeleting = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _service.deleteProduct(id);
+      await fetchProducts(page: _currentPage);
+    } catch (e) {
+      _errorMessage = e.toString();
+      rethrow;
+    } finally {
+      _isDeleting = false;
+      notifyListeners();
+    }
   }
 
   @override

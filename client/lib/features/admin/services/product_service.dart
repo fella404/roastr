@@ -32,4 +32,53 @@ class ProductService {
     final response = await _api.get('${ApiConstants.products}/$id');
     return Product.fromJson(response);
   }
+
+  Future<Product> createProduct({
+    required String name,
+    required String categoryId,
+    required double price,
+    String? imagePath,
+  }) async {
+    final fields = {
+      'name': name,
+      'categoryId': categoryId,
+      'price': price.toString(),
+    };
+
+    final response = await _api.postMultipart(
+      ApiConstants.products,
+      fields: fields,
+      filePath: imagePath,
+      fileField: 'image',
+    );
+
+    return Product.fromJson(response);
+  }
+
+  Future<Product> updateProduct({
+    required String id,
+    required String name,
+    required String categoryId,
+    required double price,
+    String? imagePath,
+  }) async {
+    final fields = {
+      'name': name,
+      'categoryId': categoryId,
+      'price': price.toString(),
+    };
+
+    final response = await _api.putMultipart(
+      '${ApiConstants.products}/$id',
+      fields: fields,
+      filePath: imagePath,
+      fileField: 'image',
+    );
+
+    return Product.fromJson(response);
+  }
+
+  Future<void> deleteProduct(String id) async {
+    await _api.delete('${ApiConstants.products}/$id');
+  }
 }

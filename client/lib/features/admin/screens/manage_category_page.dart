@@ -55,7 +55,7 @@ class _ManageCategoryPageState extends State<ManageCategoryPage> {
       context: context,
       builder: (context) => DeleteConfirmationDialog(
         title: 'Delete Category',
-        message: 'Are you sure you want to delete this category? This action cannot be undone.',
+        message: 'Are you sure you want to delete this category?',
         warningMessage: category.totalProducts > 0
             ? 'All products related to this category will be deleted also'
             : null,

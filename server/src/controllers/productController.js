@@ -15,7 +15,10 @@ export const getProducts = async (req, res) => {
     }
 
     const [products, total] = await Promise.all([
-      Product.find(filter).populate("categoryId", "name icon").skip(skip).limit(limit),
+      Product.find(filter)
+        .populate("categoryId", "name icon")
+        .skip(skip)
+        .limit(limit),
       Product.countDocuments(filter),
     ]);
 
@@ -34,7 +37,7 @@ export const getProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id).populate(
       "categoryId",
-      "name icon"
+      "name icon",
     );
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
