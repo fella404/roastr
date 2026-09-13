@@ -126,6 +126,7 @@ class AdminDrawer extends StatelessWidget {
               : null,
           onTap: () {
             context.go(item.route);
+            Navigator.pop(context);
           },
         );
       },

@@ -217,8 +217,6 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
             });
           },
           child: Container(
-            width: 48,
-            height: 48,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: isSelected ? AppColors.greenAccent.withValues(alpha: 0.1) : AppColors.white,
