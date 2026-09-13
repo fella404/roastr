@@ -5,7 +5,9 @@ import 'core/network/api_service.dart';
 import 'core/network/storage_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/admin/providers/category_provider.dart';
+import 'features/admin/providers/product_provider.dart';
 import 'features/admin/services/category_service.dart';
+import 'features/admin/services/product_service.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/auth/services/auth_service.dart';
 import 'routing/router.dart';
@@ -21,6 +23,7 @@ void main() async {
   final authProvider = AuthProvider(authService, apiService);
 
   final categoryService = CategoryService(apiService);
+  final productService = ProductService(apiService);
 
   await authProvider.checkAuthStatus();
 
@@ -31,9 +34,13 @@ void main() async {
         Provider<ApiService>.value(value: apiService),
         Provider<AuthService>.value(value: authService),
         Provider<CategoryService>.value(value: categoryService),
+        Provider<ProductService>.value(value: productService),
         ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
         ChangeNotifierProvider<CategoryProvider>(
           create: (_) => CategoryProvider(categoryService),
+        ),
+        ChangeNotifierProvider<ProductProvider>(
+          create: (_) => ProductProvider(productService),
         ),
       ],
       child: const RoastrApp(),

@@ -8,6 +8,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../shared/widgets/delete_confirmation_dialog.dart';
 import '../../../shared/widgets/loading_overlay.dart';
 import '../../../shared/widgets/manage_item_card.dart';
+import '../../../shared/widgets/pagination_widget.dart';
 import '../../../shared/widgets/search_bar_with_add_button.dart';
 import '../models/category_model.dart';
 import '../providers/category_provider.dart';
@@ -164,7 +165,16 @@ class _ManageCategoryPageState extends State<ManageCategoryPage> {
                           ),
                         );
                       }),
-                      _buildPagination(provider),
+                      PaginationWidget(
+                        currentPage: provider.currentPage,
+                        totalPages: provider.totalPages,
+                        totalItems: provider.totalItems,
+                        hasPreviousPage: provider.hasPreviousPage,
+                        hasNextPage: provider.hasNextPage,
+                        isLoading: provider.isLoading,
+                        onPrevious: provider.previousPage,
+                        onNext: provider.nextPage,
+                      ),
                       const SizedBox(height: 24),
                     ],
                   ),
@@ -202,53 +212,4 @@ class _ManageCategoryPageState extends State<ManageCategoryPage> {
     );
   }
 
-  Widget _buildPagination(CategoryProvider provider) {
-    if (provider.totalPages <= 1) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: Column(
-        children: [
-          Text(
-            'Page ${provider.currentPage} of ${provider.totalPages}  (${provider.totalItems} items)',
-            style: const TextStyle(fontSize: 13, color: AppColors.textBlackSoft),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildPaginationButton(
-                label: 'Prev',
-                onPressed: provider.hasPreviousPage && !provider.isLoading ? () => provider.previousPage() : null,
-              ),
-              const SizedBox(width: 12),
-              _buildPaginationButton(
-                label: 'Next',
-                onPressed: provider.hasNextPage && !provider.isLoading ? () => provider.nextPage() : null,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPaginationButton({required String label, required VoidCallback? onPressed}) {
-    return SizedBox(
-      width: 100,
-      height: 40,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.greenAccent,
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: AppColors.greenAccent.withValues(alpha: 0.4),
-          disabledForegroundColor: Colors.white70,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          elevation: 0,
-        ),
-        child: Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-      ),
-    );
-  }
 }

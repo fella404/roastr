@@ -1,31 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../../core/constants/api_constants.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/category_icons.dart';
 import '../../../shared/widgets/category_filter_chips.dart';
 import '../../../shared/widgets/manage_item_card.dart';
+import '../../../shared/widgets/pagination_widget.dart';
 import '../../../shared/widgets/search_bar_with_add_button.dart';
-import '../models/product_model.dart';
-
-const List<CategoryChipData> _categories = [
-  CategoryChipData(id: 'cat1', name: 'Coffee', iconKey: 'local_cafe'),
-  CategoryChipData(id: 'cat2', name: 'Cake', iconKey: 'cake'),
-  CategoryChipData(id: 'cat3', name: 'Fast Food', iconKey: 'fastfood'),
-  CategoryChipData(id: 'cat4', name: 'Drinks', iconKey: 'local_bar'),
-];
-
-const List<Product> _allProducts = [
-  Product(id: '1', name: 'Espresso', image: '', price: 25000, categoryId: 'cat1', categoryName: 'Coffee', categoryIcon: 'local_cafe'),
-  Product(id: '2', name: 'Cappuccino', image: '', price: 30000, categoryId: 'cat1', categoryName: 'Coffee', categoryIcon: 'local_cafe'),
-  Product(id: '3', name: 'Caffe Latte', image: '', price: 32000, categoryId: 'cat1', categoryName: 'Coffee', categoryIcon: 'local_cafe'),
-  Product(id: '4', name: 'Chocolate Cake', image: '', price: 35000, categoryId: 'cat2', categoryName: 'Cake', categoryIcon: 'cake'),
-  Product(id: '5', name: 'Red Velvet Cake', image: '', price: 38000, categoryId: 'cat2', categoryName: 'Cake', categoryIcon: 'cake'),
-  Product(id: '6', name: 'Tiramisu', image: '', price: 42000, categoryId: 'cat2', categoryName: 'Cake', categoryIcon: 'cake'),
-  Product(id: '7', name: 'Beef Burger', image: '', price: 45000, categoryId: 'cat3', categoryName: 'Fast Food', categoryIcon: 'fastfood'),
-  Product(id: '8', name: 'French Fries', image: '', price: 20000, categoryId: 'cat3', categoryName: 'Fast Food', categoryIcon: 'fastfood'),
-  Product(id: '9', name: 'Orange Juice', image: '', price: 18000, categoryId: 'cat4', categoryName: 'Drinks', categoryIcon: 'local_bar'),
-  Product(id: '10', name: 'Mineral Water', image: '', price: 8000, categoryId: 'cat4', categoryName: 'Drinks', categoryIcon: 'local_bar'),
-];
+import '../../admin/providers/category_provider.dart';
+import '../../admin/providers/product_provider.dart';
 
 class ManageProductPage extends StatefulWidget {
   const ManageProductPage({super.key});
@@ -36,7 +20,15 @@ class ManageProductPage extends StatefulWidget {
 
 class _ManageProductPageState extends State<ManageProductPage> {
   final _searchController = TextEditingController();
-  String? _selectedCategoryId;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CategoryProvider>().fetchCategories();
+      context.read<ProductProvider>().fetchProducts();
+    });
+  }
 
   @override
   void dispose() {
@@ -44,29 +36,14 @@ class _ManageProductPageState extends State<ManageProductPage> {
     super.dispose();
   }
 
-  List<Product> get _filteredProducts {
-    if (_selectedCategoryId == null) return _allProducts;
-    return _allProducts.where((product) => product.categoryId == _selectedCategoryId).toList();
+  void _handleEdit(dynamic product) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('Edit ${product.name} - Not implemented yet'), backgroundColor: AppColors.greenAccent));
   }
 
-  void _onCategorySelected(String? categoryId) {
-    setState(() {
-      _selectedCategoryId = categoryId;
-    });
-  }
-
-  void _handleEdit(Product product) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Edit ${product.name} - Not implemented yet'),
-      backgroundColor: AppColors.greenAccent,
-    ));
-  }
-
-  void _handleDelete(Product product) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Delete ${product.name} - Not implemented yet'),
-      backgroundColor: Colors.red,
-    ));
+  void _handleDelete(dynamic product) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('Delete ${product.name} - Not implemented yet'), backgroundColor: Colors.red));
   }
 
   String _formatPrice(double price) {
@@ -77,11 +54,17 @@ class _ManageProductPageState extends State<ManageProductPage> {
 
   @override
   Widget build(BuildContext context) {
+    final productProvider = context.watch<ProductProvider>();
+    final categoryProvider = context.watch<CategoryProvider>();
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(icon: const Icon(Icons.menu), onPressed: () => Scaffold.of(context).openDrawer()),
         titleSpacing: 12,
-        title: const Text('Manage Product', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.textBlack)),
+        title: const Text(
+          'Manage Product',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.textBlack),
+        ),
       ),
       body: Column(
         children: [
@@ -90,55 +73,122 @@ class _ManageProductPageState extends State<ManageProductPage> {
             child: SearchBarWithAddButton(
               hintText: 'Search product...',
               controller: _searchController,
-              onChanged: (value) {},
+              onChanged: (value) => productProvider.searchProducts(value),
               onAddPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Add Product - Not implemented yet'), backgroundColor: AppColors.greenAccent),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('Add Product - Not implemented yet'), backgroundColor: AppColors.greenAccent));
               },
             ),
           ),
           const SizedBox(height: 24),
-          CategoryFilterChips(
-            categories: _categories,
-            selectedCategoryId: _selectedCategoryId,
-            onCategorySelected: _onCategorySelected,
-          ),
+          categoryProvider.isLoading
+              ? const SizedBox(height: 88, child: Center(child: CircularProgressIndicator()))
+              : CategoryFilterChips(
+                  categories: categoryProvider.categories
+                      .map((cat) => CategoryChipData(id: cat.id, name: cat.name, iconKey: cat.icon))
+                      .toList(),
+                  selectedCategoryId: productProvider.selectedCategoryId,
+                  onCategorySelected: (id) => productProvider.filterByCategory(id),
+                ),
           const SizedBox(height: 24),
-          Expanded(
-            child: _filteredProducts.isEmpty
-                ? const Center(child: Text('No products found in this category', style: TextStyle(fontSize: 14, color: AppColors.textBlackSoft)))
-                : RefreshIndicator(
-                    onRefresh: () async {},
-                    child: ListView(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      children: [
-                        ..._filteredProducts.map((product) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: _buildProductItem(product: product),
-                          );
-                        }),
-                        _buildPagination(),
-                        const SizedBox(height: 24),
-                      ],
-                    ),
-                  ),
-          ),
+          Expanded(child: _buildProductList(productProvider)),
         ],
       ),
     );
   }
 
-  Widget _buildProductItem({required Product product}) {
+  Widget _buildProductList(ProductProvider productProvider) {
+    if (productProvider.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (productProvider.errorMessage != null) {
+      return _buildErrorState(productProvider);
+    }
+
+    if (productProvider.products.isEmpty) {
+      return const Center(
+        child: Text('No products found', style: TextStyle(fontSize: 14, color: AppColors.textBlackSoft)),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: productProvider.refreshProducts,
+      child: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        children: [
+          ...productProvider.products.map((product) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _buildProductItem(product: product),
+            );
+          }),
+          PaginationWidget(
+            currentPage: productProvider.currentPage,
+            totalPages: productProvider.totalPages,
+            totalItems: productProvider.totalItems,
+            hasPreviousPage: productProvider.hasPreviousPage,
+            hasNextPage: productProvider.hasNextPage,
+            isLoading: productProvider.isLoading,
+            onPrevious: productProvider.previousPage,
+            onNext: productProvider.nextPage,
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(ProductProvider productProvider) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 64, color: Colors.red),
+          const SizedBox(height: 16),
+          Text(
+            productProvider.errorMessage!,
+            style: const TextStyle(color: Colors.red),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(onPressed: productProvider.refreshProducts, child: const Text('Retry')),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProductItem({required dynamic product}) {
     return ManageItemCard(
       content: Row(
         children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(color: AppColors.greenLight, borderRadius: BorderRadius.circular(12)),
-            child: Icon(CategoryIcons.getIcon(product.categoryIcon) ?? Icons.fastfood, size: 32, color: AppColors.greenAccent),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.network(
+              '${ApiConstants.uploadsUrl}${product.image}',
+              width: 64,
+              height: 64,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                print('Image URL: ${ApiConstants.uploadsUrl}${product.image}');
+                return Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(color: AppColors.greenLight, borderRadius: BorderRadius.circular(12)),
+                  child: Icon(CategoryIcons.getIcon(product.categoryIcon) ?? Icons.fastfood, size: 32, color: AppColors.greenAccent),
+                );
+              },
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(color: AppColors.ceramic, borderRadius: BorderRadius.circular(12)),
+                  child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                );
+              },
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -147,7 +197,10 @@ class _ManageProductPageState extends State<ManageProductPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(product.categoryName, style: const TextStyle(fontSize: 12, color: AppColors.textBlackSoft)),
-                Text(product.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textBlack)),
+                Text(
+                  product.name,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textBlack),
+                ),
                 Text(_formatPrice(product.price), style: const TextStyle(fontSize: 14, color: AppColors.starbucksGreen)),
               ],
             ),
@@ -156,45 +209,6 @@ class _ManageProductPageState extends State<ManageProductPage> {
       ),
       onEdit: () => _handleEdit(product),
       onDelete: () => _handleDelete(product),
-    );
-  }
-
-  Widget _buildPagination() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: Column(
-        children: [
-          Text('Page 1 of 1  (${_filteredProducts.length} items)', style: const TextStyle(fontSize: 13, color: AppColors.textBlackSoft)),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildPaginationButton(label: 'Prev', onPressed: null),
-              const SizedBox(width: 12),
-              _buildPaginationButton(label: 'Next', onPressed: null),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPaginationButton({required String label, required VoidCallback? onPressed}) {
-    return SizedBox(
-      width: 100,
-      height: 40,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.greenAccent,
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: AppColors.greenAccent.withValues(alpha: 0.4),
-          disabledForegroundColor: Colors.white70,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          elevation: 0,
-        ),
-        child: Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-      ),
     );
   }
 }

@@ -24,7 +24,6 @@ export const login = async (req, res) => {
 
     const user = await User.findOne({ email }).select("+password");
     if (!user || !(await user.comparePassword(password))) {
-      consolo.log(user);
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
