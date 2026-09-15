@@ -7,7 +7,9 @@ import '../features/auth/providers/auth_provider.dart';
 import '../features/admin/screens/category_form_page.dart';
 import '../features/admin/screens/manage_category_page.dart';
 import '../features/admin/screens/manage_product_page.dart';
+import '../features/admin/screens/manage_user_page.dart';
 import '../features/admin/screens/product_form_page.dart';
+import '../features/admin/screens/user_form_page.dart';
 import '../features/auth/screens/login_page.dart';
 import '../shared/widgets/admin_drawer.dart';
 import '../shared/widgets/floating_close_button.dart';
@@ -80,7 +82,7 @@ final router = GoRouter(
         ),
         GoRoute(
           path: '/admin/users',
-          builder: (context, state) => const _PlaceholderPage(title: 'Users'),
+          builder: (context, state) => const ManageUserPage(),
         ),
         GoRoute(
           path: '/admin/categories',
@@ -122,6 +124,17 @@ final router = GoRouter(
       builder: (context, state) {
         final productId = state.pathParameters['id']!;
         return ProductFormPage(productId: productId);
+      },
+    ),
+    GoRoute(
+      path: '/admin/users/add',
+      builder: (context, state) => const UserFormPage(),
+    ),
+    GoRoute(
+      path: '/admin/users/edit/:id',
+      builder: (context, state) {
+        final userId = state.pathParameters['id']!;
+        return UserFormPage(userId: userId);
       },
     ),
   ],

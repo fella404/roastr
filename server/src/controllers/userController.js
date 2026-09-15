@@ -70,7 +70,7 @@ export const createUser = async (req, res) => {
 // @route   PUT /api/users/:id
 export const updateUser = async (req, res) => {
   try {
-    const { name, email, role } = req.body;
+    const { name, email, role, isActive } = req.body;
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -86,6 +86,7 @@ export const updateUser = async (req, res) => {
     user.name = name || user.name;
     user.email = email || user.email;
     if (role) user.role = role;
+    if (isActive !== undefined) user.isActive = isActive;
 
     await user.save();
     res.json({
@@ -100,18 +101,20 @@ export const updateUser = async (req, res) => {
   }
 };
 
-// @desc    Toggle user active status
-// @route   PATCH /api/users/:id/toggle-active
-export const toggleActive = async (req, res) => {
+// @desc    Soft delete user (set isActive to false)
+// @route   DELETE /api/users/:id
+export const deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    user.isActive = !user.isActive;
+    user.isActive = false;
     await user.save();
+    
     res.json({
+      message: "User deactivated successfully",
       _id: user._id,
       name: user.name,
       email: user.email,

@@ -42,6 +42,12 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  Future<Map<String, dynamic>> patch(String path, {Object? body}) async {
+    final uri = Uri.parse('${ApiConstants.baseUrl}$path');
+    final response = await http.patch(uri, headers: _headers, body: body != null ? jsonEncode(body) : null);
+    return _handleResponse(response);
+  }
+
   Future<Map<String, dynamic>> postMultipart(
     String path, {
     required Map<String, String> fields,

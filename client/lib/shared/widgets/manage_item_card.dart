@@ -38,12 +38,14 @@ class ManageItemCard extends StatelessWidget {
                 color: AppColors.greenAccent,
                 onTap: onEdit,
               ),
-              const SizedBox(width: 8),
-              _buildActionButton(
-                label: 'Delete',
-                color: Colors.red,
-                onTap: onDelete,
-              ),
+              if (onDelete != null) ...[
+                const SizedBox(width: 8),
+                _buildActionButton(
+                  label: 'Delete',
+                  color: Colors.red,
+                  onTap: onDelete,
+                ),
+              ],
             ],
           ),
         ],
